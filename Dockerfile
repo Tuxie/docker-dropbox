@@ -1,16 +1,15 @@
-FROM debian:jessie
-MAINTAINER Jan Broer <janeczku@yahoo.de>
+FROM debian:buster-slim
+MAINTAINER Per Wigren <per.wigren@gmail.com>
 ENV DEBIAN_FRONTEND noninteractive
 
 # Following 'How do I add or remove Dropbox from my Linux repository?' - https://www.dropbox.com/en/help/246
-RUN echo 'deb http://linux.dropbox.com/debian jessie main' > /etc/apt/sources.list.d/dropbox.list \
+RUN apt-get -qqy update \
+	&& apt-get -qqy install gnupg2 \
+	&& echo 'deb http://linux.dropbox.com/debian buster main' > /etc/apt/sources.list.d/dropbox.list \
 	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C61A2656FB57B7E4DE0F4C1FC918B335044912E \
 	&& apt-get -qqy update \
-	# Note 'ca-certificates' dependency is required for 'dropbox start -i' to succeed
-	&& apt-get -qqy install ca-certificates curl python-gpgme dropbox git build-essential locales\
-	# Perform image clean up.
-	&& apt-get -qqy autoclean \
-	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+	&& apt-get -qqy install ca-certificates curl python3-gpg dropbox git build-essential locales\
+	&& ln -s /usr/bin/python3 /usr/bin/python \
 	# Create service account and set permissions.
 	&& groupadd dropbox \
 	&& useradd -m -d /dbox -c "Dropbox Daemon Account" -s /usr/sbin/nologin -g dropbox dropbox \
@@ -21,7 +20,11 @@ RUN echo 'deb http://linux.dropbox.com/debian jessie main' > /etc/apt/sources.li
         && cd /tmp \
         && mv dropbox-filesystem-fix /opt/ \
         && chmod +x /opt/dropbox-filesystem-fix/dropbox_start.py \
-        && rm -rf /tmp/dropbox-filesystem-fix
+        && rm -rf /tmp/dropbox-filesystem-fix \
+	# Perform image clean up.
+	&& apt-get -qqy autoclean \
+	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+        && apt-get -qqy autoremove build-essential git
 
 # Dropbox is weird: it insists on downloading its binaries itself via 'dropbox
 # start -i'. So we switch to 'dropbox' user temporarily and let it do its thing.
