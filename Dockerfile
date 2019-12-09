@@ -8,7 +8,7 @@ RUN apt-get -qqy update \
 	&& echo 'deb http://linux.dropbox.com/debian buster main' > /etc/apt/sources.list.d/dropbox.list \
 	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C61A2656FB57B7E4DE0F4C1FC918B335044912E \
 	&& apt-get -qqy update \
-	&& apt-get -qqy install ca-certificates curl python3-gpg dropbox git build-essential locales\
+	&& apt-get -qqy install ca-certificates curl python3-gpg dropbox git build-essential locales libatomic1 \
 	&& ln -s /usr/bin/python3 /usr/bin/python \
 	# Create service account and set permissions.
 	&& groupadd dropbox \
